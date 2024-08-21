@@ -1,0 +1,48 @@
+.container {
+  padding: 1rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.canvasContainer {
+  flex: 2;
+}
+
+.canvas {
+  border: 1px solid #ccc;
+  cursor: crosshair;
+}
+
+.inputsContainer {
+  flex: 1;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  font-weight: semibold;
+  margin-bottom: 0.5rem;
+}
+
+.textInput {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem;
+}
+
+.downloadButton {
+  padding: 0.5rem 1rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
