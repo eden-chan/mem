@@ -5,7 +5,10 @@ const REGION = import.meta.env.VITE_AWS_REGION;
 const ACCESS_KEY_ID = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
 const BUCKET_NAME = import.meta.env.VITE_AWS_BUCKET_NAME;
+const BASE_PATH = import.meta.env.VITE_AWS_BASE_PATH || 'base_template_images';
 
+// https://memetic.s3.us-east-2.amazonaws.com/
+const BASE_URL = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/`;
 const s3Client = new S3Client({
   region: REGION,
   credentials: {
@@ -17,6 +20,7 @@ const s3Client = new S3Client({
 export async function listImagesFromS3(): Promise<string[]> {
   const command = new ListObjectsV2Command({
     Bucket: BUCKET_NAME,
+    Prefix: BASE_PATH + '/',
   });
 
   try {
@@ -38,13 +42,15 @@ export async function listImagesFromS3(): Promise<string[]> {
 }
 
 export async function deleteFromS3(url: string): Promise<void> {
-  const key = url.split('/').pop();
+  const key = extractObjectKeyFromUrl(url);
   if (!key) return;
 
   const command = new DeleteObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
   });
+
+  console.log("[MemeGenerator] Deleting image", url, key);
 
   try {
     await s3Client.send(command);
@@ -54,7 +60,7 @@ export async function deleteFromS3(url: string): Promise<void> {
 }
 
 export async function uploadToS3(file: File): Promise<string | null> {
-  const key = `${Date.now()}-${file.name}`;
+  const key = `${BASE_PATH}/${Date.now()}-${file.name}`;
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
@@ -81,4 +87,16 @@ export async function uploadToS3(file: File): Promise<string | null> {
     console.error("Error generating signed URL:", err);
     return null;
   }
+}
+
+export function extractObjectKeyFromUrl(url: string): string {
+  const BASE_URL = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/`;
+  
+  // Remove query parameters
+  const urlWithoutParams = url.split('?')[0];
+  
+  // Remove base URL
+  const key = urlWithoutParams.replace(BASE_URL, '');
+  
+  return key;
 }

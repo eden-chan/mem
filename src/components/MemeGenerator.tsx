@@ -3,6 +3,7 @@ import type { Component } from 'solid-js';
 import { MemeModel } from '../models/MemeModel';
 import { listImagesFromS3, deleteFromS3, uploadToS3 } from '../utils/s3';
 import { FileUploader } from './FileUploader';
+import { ImageGallery } from './ImageGallery';
 import styles from './MemeGenerator.module.css';
 
 const MemeGenerator: Component = () => {
@@ -25,8 +26,14 @@ const MemeGenerator: Component = () => {
         setImages(imageList);
     });
 
-    const handleUploadSuccess = (url: string) => {
-        setImages([...images(), url]);
+    const handleUploadSuccess = async (url: string) => {
+        console.log("Uploaded image", url);
+
+        // Refresh the list of images
+        const updatedImageList = await listImagesFromS3();
+        setImages(updatedImageList);
+
+        // Load the newly uploaded image
         loadImage(url);
     };
 
@@ -54,13 +61,17 @@ const MemeGenerator: Component = () => {
 
     const loadImage = (src: string) => {
         const img = new Image();
-        img.crossOrigin = "anonymous";
         img.onload = () => {
             setCanvasSize({ width: img.width, height: img.height });
             if (memeModel()) {
-                memeModel()!.setImage(src);
+                memeModel()!.setImage(img);
+                memeModel()!.redrawCanvas();  // Ensure the canvas is redrawn
             }
         };
+        img.onerror = (error) => {
+            console.error("Error loading image:", error);
+        };
+        console.log("Loading image from", src);
         img.src = src;
     };
 
@@ -123,9 +134,27 @@ const MemeGenerator: Component = () => {
         memeModel()?.updateText(index, value);
     };
 
+    const handleImageSelect = (src: string) => {
+        loadImage(src);
+    };
+
+    const handleImageDelete = async (deletedImageUrl: string) => {
+        console.log("Deleting image", deletedImageUrl);
+        await deleteImage(deletedImageUrl);
+
+        // Refresh the list of images
+        const updatedImageList = await listImagesFromS3();
+        setImages(updatedImageList);
+
+        if (memeModel()?.getCurrentImageUrl() === deletedImageUrl) {
+            // If the deleted image is the current one, load the default image
+            memeModel()?.loadDefaultImage();
+        }
+    };
+
     return (
         <div class={styles.container}>
-            <h1 class={styles.title}>Meme Generator</h1>
+            <h1 class={styles.title}>Create Memetic</h1>
             <div class={styles.content}>
                 <div
                     class={`${styles.canvasContainer} ${isDragging() ? styles.dragging : ''}`}
@@ -148,17 +177,12 @@ const MemeGenerator: Component = () => {
                 <div class={styles.inputsContainer}>
                     <h2 class={styles.subtitle}>Upload Image</h2>
                     <FileUploader onUploadSuccess={handleUploadSuccess} />
-                    <h2 class={styles.subtitle}>Saved Images</h2>
-                    <div class={styles.imageList}>
-                        <For each={images()}>
-                            {(img) => (
-                                <div class={styles.imageItem}>
-                                    <img src={img} alt="Saved meme" onClick={() => loadImage(img)} />
-                                    <button onClick={() => deleteImage(img)}>Delete</button>
-                                </div>
-                            )}
-                        </For>
-                    </div>
+                    <h2 class={styles.subtitle}>Image Gallery</h2>
+                    <ImageGallery
+                        images={images()}
+                        onImageSelect={handleImageSelect}
+                        onImageDelete={handleImageDelete}
+                    />
                     <h2 class={styles.subtitle}>Text Inputs</h2>
                     <For each={memeModel()?.getBoxes()}>
                         {(_, index) => (

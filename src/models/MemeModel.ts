@@ -1,10 +1,6 @@
 import { createSignal } from 'solid-js';
-import { listImagesFromS3 } from '../utils/s3';
 
-const REGION = import.meta.env.VITE_AWS_REGION;
-const BUCKET_NAME = import.meta.env.VITE_AWS_BUCKET_NAME;
-const BASE_PATH = import.meta.env.VITE_S3_BASE_PATH || 'base_template_images';
-const DEFAULT_IMAGE_FILENAME = import.meta.env.VITE_DEFAULT_IMAGE_FILENAME || 'midwit.jpg';
+const DEFAULT_IMAGE_FILENAME = import.meta.env.VITE_AWS_DEFAULT_IMAGE_FILENAME || 'midwit.jpg';
 
 interface Box {
   x: number;
@@ -13,12 +9,11 @@ interface Box {
   height: number;
 }
 
-const DEFAULT_IMAGE_URL = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${BASE_PATH}/${DEFAULT_IMAGE_FILENAME}`;
 const DEFAULT_IMAGE_PATH = `${DEFAULT_IMAGE_FILENAME}`;
 export class MemeModel {
   private boxesSignal: ReturnType<typeof createSignal<Box[]>>;
   private textsSignal: ReturnType<typeof createSignal<string[]>>;
-  private canvas: HTMLCanvasElement | undefined;
+  private canvas: HTMLCanvasElement;
   private image: HTMLImageElement | undefined;
 
   constructor(canvas: HTMLCanvasElement) {
@@ -28,28 +23,36 @@ export class MemeModel {
     this.loadDefaultImage();
   }
 
-  private async loadDefaultImage() {
-    // const images = await listImagesFromS3();
-    const midwitTemplate = DEFAULT_IMAGE_PATH;
-    // images.find(url => url.includes(DEFAULT_IMAGE_FILENAME)) || DEFAULT_IMAGE_URL;
-    this.loadImage(midwitTemplate);
+  public loadDefaultImage() {
+    this.loadImage(DEFAULT_IMAGE_PATH);
   }
 
-  public setImage(src: string): void {
-    this.loadImage(src);
+  public getCurrentImageUrl(): string | undefined {
+    return this.image?.src;
+  }
+
+  public setImage(image: HTMLImageElement): void {
+    this.image = image;
+    this.updateCanvasSize();
+    this.redrawCanvas();
   }
 
   private loadImage(src: string) {
     const image = new Image();
-    image.src = src;
     image.onload = () => {
-      this.image = image;
-      if (this.canvas) {
-        this.canvas.width = image.width;
-        this.canvas.height = image.height;
-        this.redrawCanvas();
-      }
+      this.setImage(image);
     };
+    image.onerror = (error) => {
+      console.error("Error loading image:", error);
+    };
+    image.src = src;
+  }
+
+  private updateCanvasSize() {
+    if (this.image && this.canvas) {
+      this.canvas.width = this.image.width;
+      this.canvas.height = this.image.height;
+    }
   }
 
   redrawCanvas() {
