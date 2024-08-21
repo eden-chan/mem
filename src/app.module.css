@@ -1,0 +1,13 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  padding: 2rem;
+}
+
+.title {
+  color: #333;
+  margin-bottom: 2rem;
+}

@@ -2,17 +2,20 @@ import { MetaProvider, Title } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
-import "./app.css";
+import { ImageManager } from './components/ImageManager';
+import styles from "./app.module.css";
 
 export default function App() {
   return (
     <Router
       root={props => (
         <MetaProvider>
-          <Title>SolidStart - Basic</Title>
-          <a href="/">Index</a>
-          <a href="/about">About</a>
-          <Suspense>{props.children}</Suspense>
+          <Title>Memetic</Title>
+          <div class={styles.app}>
+            <h1 class={styles.title}>Memetic</h1>
+            <ImageManager />
+            <Suspense>{props.children}</Suspense>
+          </div>
         </MetaProvider>
       )}
     >

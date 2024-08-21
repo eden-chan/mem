@@ -1,4 +1,10 @@
 import { createSignal } from 'solid-js';
+import { listImagesFromS3 } from '../utils/s3';
+
+const REGION = import.meta.env.VITE_AWS_REGION;
+const BUCKET_NAME = import.meta.env.VITE_AWS_BUCKET_NAME;
+const BASE_PATH = import.meta.env.VITE_S3_BASE_PATH || 'base_template_images';
+const DEFAULT_IMAGE_FILENAME = import.meta.env.VITE_DEFAULT_IMAGE_FILENAME || 'midwit.jpg';
 
 interface Box {
   x: number;
@@ -7,6 +13,8 @@ interface Box {
   height: number;
 }
 
+const DEFAULT_IMAGE_URL = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${BASE_PATH}/${DEFAULT_IMAGE_FILENAME}`;
+const DEFAULT_IMAGE_PATH = `${DEFAULT_IMAGE_FILENAME}`;
 export class MemeModel {
   private boxesSignal: ReturnType<typeof createSignal<Box[]>>;
   private textsSignal: ReturnType<typeof createSignal<string[]>>;
@@ -17,7 +25,18 @@ export class MemeModel {
     this.boxesSignal = createSignal<Box[]>([]);
     this.textsSignal = createSignal<string[]>([]);
     this.canvas = canvas;
-    this.loadImage('/path/to/your/meme-template.jpg');
+    this.loadDefaultImage();
+  }
+
+  private async loadDefaultImage() {
+    // const images = await listImagesFromS3();
+    const midwitTemplate = DEFAULT_IMAGE_PATH;
+    // images.find(url => url.includes(DEFAULT_IMAGE_FILENAME)) || DEFAULT_IMAGE_URL;
+    this.loadImage(midwitTemplate);
+  }
+
+  public setImage(src: string): void {
+    this.loadImage(src);
   }
 
   private loadImage(src: string) {

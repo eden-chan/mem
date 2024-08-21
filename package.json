@@ -7,12 +7,15 @@
     "start": "vinxi start"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.635.0",
+    "@aws-sdk/s3-request-presigner": "^3.635.0",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.14.1",
     "@solidjs/start": "^1.0.6",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",
     "@typeschema/valibot": "^0.13.4",
+    "aws-sdk": "^2.1680.0",
     "solid-js": "^1.8.18",
     "valibot": "^0.29.0",
     "vinxi": "^0.4.1"

@@ -8,6 +8,10 @@ declare const styles: {
   readonly subtitle: string;
   readonly textInput: string;
   readonly downloadButton: string;
+  readonly dragging: string;
+  readonly dropOverlay: string;
+  readonly imageList: string;
+  readonly imageItem: string;
 };
 
 export default styles;
