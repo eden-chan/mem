@@ -1,11 +1,17 @@
-import { S3Client, ListObjectsV2Command, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  ListObjectsV2Command,
+  DeleteObjectCommand,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const REGION = import.meta.env.VITE_AWS_REGION;
 const ACCESS_KEY_ID = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
 const BUCKET_NAME = import.meta.env.VITE_AWS_BUCKET_NAME;
-const BASE_PATH = import.meta.env.VITE_AWS_BASE_PATH || 'base_template_images';
+const BASE_PATH = import.meta.env.VITE_AWS_BASE_PATH || "base_template_images";
 
 // https://memetic.s3.us-east-2.amazonaws.com/
 const BASE_URL = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/`;
@@ -20,20 +26,22 @@ const s3Client = new S3Client({
 export async function listImagesFromS3(): Promise<string[]> {
   const command = new ListObjectsV2Command({
     Bucket: BUCKET_NAME,
-    Prefix: BASE_PATH + '/',
+    Prefix: BASE_PATH + "/",
   });
 
   try {
     const response = await s3Client.send(command);
-    const signedUrls = await Promise.all((response.Contents || [])
-      .filter(item => item.Key && item.Key.match(/\.(jpg|jpeg|png|gif)$/i))
-      .map(async item => {
-        const getObjectCommand = new GetObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: item.Key!,
-        });
-        return getSignedUrl(s3Client, getObjectCommand, { expiresIn: 3600 });
-      }));
+    const signedUrls = await Promise.all(
+      (response.Contents || [])
+        .filter((item) => item.Key && item.Key.match(/\.(jpg|jpeg|png|gif)$/i))
+        .map(async (item) => {
+          const getObjectCommand = new GetObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: item.Key!,
+          });
+          return getSignedUrl(s3Client, getObjectCommand, { expiresIn: 3600 });
+        }),
+    );
     return signedUrls;
   } catch (err) {
     console.error("Error listing objects from S3:", err);
@@ -68,12 +76,14 @@ export async function uploadToS3(file: File): Promise<string | null> {
   });
 
   try {
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    const signedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
     const response = await fetch(signedUrl, {
-      method: 'PUT',
+      method: "PUT",
       body: file,
       headers: {
-        'Content-Type': file.type,
+        "Content-Type": file.type,
       },
     });
 
@@ -91,12 +101,12 @@ export async function uploadToS3(file: File): Promise<string | null> {
 
 export function extractObjectKeyFromUrl(url: string): string {
   const BASE_URL = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/`;
-  
+
   // Remove query parameters
-  const urlWithoutParams = url.split('?')[0];
-  
+  const urlWithoutParams = url.split("?")[0];
+
   // Remove base URL
-  const key = urlWithoutParams.replace(BASE_URL, '');
-  
+  const key = urlWithoutParams.replace(BASE_URL, "");
+
   return key;
 }
