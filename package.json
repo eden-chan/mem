@@ -2,16 +2,16 @@
   "name": "example-with-trpc",
   "type": "module",
   "scripts": {
-    "dev": "vinxi dev",
     "build": "vinxi build",
-    "start": "vinxi start",
-    "prepare": "husky"
+    "dev": "vinxi dev",
+    "prepare": "husky",
+    "start": "vinxi start"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.635.0",
     "@aws-sdk/s3-request-presigner": "^3.635.0",
     "@solidjs/meta": "^0.29.4",
-    "@solidjs/router": "^0.14.1",
+    "@solidjs/router": "^0.14.3",
     "@solidjs/start": "^1.0.6",
     "@supabase/supabase-js": "^2.45.1",
     "@trpc/client": "^10.45.2",
@@ -21,6 +21,7 @@
     "husky": "^9.1.5",
     "lint-staged": "^15.2.9",
     "solid-js": "^1.8.18",
+    "sst": "3.0.64",
     "valibot": "^0.29.0",
     "vinxi": "^0.4.1"
   },
@@ -31,14 +32,17 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@types/bun": "latest",
-    "globals": "^15.9.0",
-    "typescript-eslint": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "^8.2.0",
     "@typescript-eslint/parser": "^8.2.0",
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.9.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.2.0"
+  },
+  "overrides": {
+    "nitropack": "npm:nitropack-nightly@latest"
   }
 }
